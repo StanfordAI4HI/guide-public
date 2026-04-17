@@ -1,0 +1,16 @@
+{
+  "name": "ai-multi-support-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/app",
+    "apps/server"
+  ],
+  "scripts": {
+    "dev:app": "npm --prefix apps/app run start",
+    "dev:web": "npm --prefix apps/app run web",
+    "dev:server": "npm --prefix apps/server run dev",
+    "lint:app": "npm --prefix apps/app run lint",
+    "preflight:secrets": "bash ./scripts/preflight-secrets.sh",
+    "hooks:install": "bash ./scripts/install-git-hooks.sh"
+  }
+}

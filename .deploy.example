@@ -1,0 +1,18 @@
+# Copy this file to .deploy.local (ignored by git) and fill values.
+# This file is safe to commit; do not place real secrets here.
+
+# Fly app names
+FLY_API_APP=my-ai-support
+FLY_WEB_APP=my-ai-support-web
+
+# Fly config file paths (relative to guide-production-core)
+FLY_API_CONFIG=../fly.toml
+FLY_WEB_CONFIG=../fly.web.toml
+
+# Public runtime settings (non-secret)
+CORS_ORIGINS=https://my-ai-support-web.fly.dev
+EXPO_PUBLIC_API_BASE=https://my-ai-support.fly.dev
+
+# Optional: command to deploy/update your separate marketing/project website
+# Example: WEBSITE_DEPLOY_CMD="(cd ../guide-project-website && npm run deploy)"
+WEBSITE_DEPLOY_CMD=
