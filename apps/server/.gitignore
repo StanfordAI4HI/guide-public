@@ -1,0 +1,9 @@
+# Node dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Optional: log files or OS junk
+*.log
+.DS_Store

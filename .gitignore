@@ -1,0 +1,30 @@
+# Node & package managers
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Expo / React Native
+.expo/
+.expo-shared/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!apps/app/.env.example
+!apps/server/.env.example
+.deploy.local
+.secrets.local
+
+# Logs & caches
+*.log
+.DS_Store
+__pycache__/
+logs/
+apps/server/data/
+
+# Build outputs
+dist/
+build/
+coverage/
