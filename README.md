@@ -20,6 +20,12 @@ Interactions are not monitored, and no real-time support is provided. Do not use
 
 While some basic safeguards are included, this system does not replace professional care. If you need additional support, please contact a qualified professional or local services.
 
+## Research App & Maintenance
+
+This is a research application built to demonstrate the ideas in the GUIDE paper. We will try to keep it maintained, but ongoing maintenance is difficult: the underlying models change constantly, and older ones are frequently updated or deprecated. Expect some drift over time.
+
+**Note on image generation:** the current code defaults to OpenAI's `gpt-image-1` model, whereas the deployed study version used `dall-e-3`. Output format and behavior may therefore differ between this source and the version used in the study.
+
 ## Prerequisites
 
 - Node.js 20+
