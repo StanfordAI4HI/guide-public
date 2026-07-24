@@ -28,3 +28,13 @@ apps/server/data/
 dist/
 build/
 coverage/
+
+# Control-condition code (kept local, excluded from public repo)
+apps/server/reframeGenerator.js
+apps/server/thinkingTraps.js
+apps/server/trapMetadata.js
+apps/server/scripts/train-thinking-traps.js
+apps/server/scripts/train-reframe.js
+apps/server/scripts/prepare-trap-chat-data.js
+apps/server/scripts/prepare-reframe-chat-data.js
+apps/app/app/dev/trap-metadata.ts
