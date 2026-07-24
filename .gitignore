@@ -38,3 +38,6 @@ apps/server/scripts/train-reframe.js
 apps/server/scripts/prepare-trap-chat-data.js
 apps/server/scripts/prepare-reframe-chat-data.js
 apps/app/app/dev/trap-metadata.ts
+
+# Local Docker build ignore (deploy artifact)
+.dockerignore
