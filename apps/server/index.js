@@ -38,8 +38,6 @@ const {
 const sessionStore = require('./db');
 const { generateImage } = require('./imageGen');
 const { synthesizeSpeech } = require('./tts');
-const { classifyThinkingTrap, TRAPS: TRAP_LIST } = require('./thinkingTraps');
-const { generateReframe, assistReframe } = require('./reframeGenerator');
 
 const MEDIA_CACHE_DIR = path.join(__dirname, 'data', 'media-cache');
 
@@ -691,7 +689,6 @@ app.get('/', (req, res) => {
           <li><code>POST /layered-intervention</code> &mdash; generate layered plans</li>
           <li><code>GET /sessions</code> &mdash; list sessions</li>
           <li><code>GET /dev/sessions</code> &mdash; dev browser for session data</li>
-          <li><code>POST /dev/thinking-traps/classify</code> &mdash; classify thinking traps (retrieval + completion)</li>
         </ul>
         <p>Point the mobile/web app’s <code>API_BASE</code> at <code>${req.protocol}://${req.get('host')}</code> to use this deployment.</p>
       </body>
@@ -4006,34 +4003,6 @@ app.post('/sessions/:id/ux-submissions', async (req, res) => {
   }
 });
 
-app.post('/sessions/:id/cognitive-reframe-step', async (req, res) => {
-  const rawId = req.params?.id;
-  const sessionId = await resolveSessionId(rawId);
-  const stepKey =
-    typeof req.body?.step_key === 'string' && req.body.step_key.trim()
-      ? req.body.step_key.trim()
-      : '';
-  const payload = req.body?.payload && typeof req.body.payload === 'object' ? req.body.payload : {};
-  if (!stepKey) {
-    return res.status(400).json({ sessionId, error: 'step_key is required' });
-  }
-  try {
-    await sessionStore.recordCognitiveReframeStep(sessionId, stepKey, payload);
-    const inferredCondition = extractStudyCondition(payload?.condition);
-    if (inferredCondition != null) {
-      await sessionStore.updateSessionTiming(sessionId, { condition: inferredCondition });
-    }
-    res.json({ sessionId, step_key: stepKey, ok: true });
-  } catch (err) {
-    console.error('Failed to persist cognitive reframe step', err?.message || err);
-    res.status(500).json({
-      sessionId,
-      error: 'Failed to persist cognitive reframe step',
-      detail: err?.message || String(err),
-    });
-  }
-});
-
 const toFiniteNumber = (value) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string' && value.trim()) {
@@ -4938,92 +4907,6 @@ app.post('/dev/stress-support/summary', async (req, res) => {
     seed,
     source: 'fallback',
   });
-});
-
-// Thinking trap classification (retrieval + completion, mirrors reframing.py pattern).
-app.post('/dev/thinking-traps/classify', async (req, res) => {
-  try {
-    const { thought, situation } = req.body || {};
-    if (!thought && !situation) {
-      return res.status(400).json({ error: 'missing_thought_or_situation' });
-    }
-    const thoughtText = typeof thought === 'string' ? thought : '';
-    const situationText = typeof situation === 'string' ? situation : '';
-    const safetyInput = [thoughtText, situationText].filter(Boolean).join('\n').trim();
-    const safety = await runSafetyRiskCheck({ latest: safetyInput });
-    if (safety?.risk) {
-      appendLog('api:baseline:thinking-traps:blocked', { reason: safety.reason || '' });
-      return res.status(200).json(safetyBlockedResponse(safety.reason || ''));
-    }
-    const result = await classifyThinkingTrap({
-      thought: thoughtText,
-      situation: situationText,
-    });
-    res.json(result);
-  } catch (err) {
-    console.error('thinking-traps classify error', err?.message || err);
-    res.status(500).json({ error: 'thinking_trap_failed' });
-  }
-});
-
-// Thinking trap metadata (for UI rendering without hitting the model).
-app.get('/dev/thinking-traps/meta', (_req, res) => {
-  res.json({ traps: TRAP_LIST });
-});
-
-// Reframe generation (retrieval + completion, similar to reframing.py but using our model).
-app.post('/dev/reframe/generate', async (req, res) => {
-  try {
-    const { thought, situation, traps } = req.body || {};
-    if (!thought && !situation) {
-      return res.status(400).json({ error: 'missing_thought_or_situation' });
-    }
-    const thoughtText = typeof thought === 'string' ? thought : '';
-    const situationText = typeof situation === 'string' ? situation : '';
-    const safetyInput = [thoughtText, situationText].filter(Boolean).join('\n').trim();
-    const safety = await runSafetyRiskCheck({ latest: safetyInput });
-    if (safety?.risk) {
-      appendLog('api:baseline:reframe-generate:blocked', { reason: safety.reason || '' });
-      return res.status(200).json(safetyBlockedResponse(safety.reason || ''));
-    }
-    const result = await generateReframe({
-      thought: thoughtText,
-      situation: situationText,
-      traps: Array.isArray(traps) ? traps.filter((t) => typeof t === 'string') : [],
-    });
-    res.json(result);
-  } catch (err) {
-    console.error('reframe generate error', err?.message || err);
-    res.status(500).json({ error: 'reframe_failed' });
-  }
-});
-
-// Optional refinement of an existing reframe with a goal (e.g., relatable, action, supportive).
-app.post('/dev/reframe/assist', async (req, res) => {
-  try {
-    const { thought, situation, traps, current, goal } = req.body || {};
-    if (!current) return res.status(400).json({ error: 'missing_current_reframe' });
-    const thoughtText = typeof thought === 'string' ? thought : '';
-    const situationText = typeof situation === 'string' ? situation : '';
-    const currentText = typeof current === 'string' ? current : '';
-    const safetyInput = [thoughtText, situationText, currentText].filter(Boolean).join('\n').trim();
-    const safety = await runSafetyRiskCheck({ latest: safetyInput });
-    if (safety?.risk) {
-      appendLog('api:baseline:reframe-assist:blocked', { reason: safety.reason || '' });
-      return res.status(200).json(safetyBlockedResponse(safety.reason || ''));
-    }
-    const result = await assistReframe({
-      thought: thoughtText,
-      situation: situationText,
-      traps: Array.isArray(traps) ? traps.filter((t) => typeof t === 'string') : [],
-      current: currentText,
-      goal: typeof goal === 'string' ? goal : '',
-    });
-    res.json(result);
-  } catch (err) {
-    console.error('reframe assist error', err?.message || err);
-    res.status(500).json({ error: 'reframe_assist_failed' });
-  }
 });
 
 app.post('/dev/stress-support/intervention', async (req, res) => {
