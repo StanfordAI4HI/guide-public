@@ -1027,7 +1027,12 @@ const [summaryMusicUri, setSummaryMusicUri] = useState<string | null>(null);
           if (!resp.ok) {
             throw new Error(parsed?.detail || parsed?.error || body || `Image failed (${resp.status})`);
           }
-          const url = typeof parsed?.url === "string" ? parsed.url.trim() : "";
+          const rawUrl =
+            (typeof parsed?.cached_url === "string" && parsed.cached_url.trim()) ||
+            (typeof parsed?.url === "string" && parsed.url.trim()) ||
+            (typeof parsed?.image?.url === "string" && parsed.image.url.trim()) ||
+            "";
+          const url = rawUrl.startsWith("/") ? `${API_BASE}${rawUrl}` : rawUrl;
           if (!url) {
             throw new Error("Image url missing");
           }

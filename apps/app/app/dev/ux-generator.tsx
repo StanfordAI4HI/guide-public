@@ -1367,8 +1367,10 @@ export default function UxGeneratorScreen({
           }),
         });
         const data = await resp.json();
-        if (resp.ok && (data?.url || data?.image?.url)) {
-          next.imageUrl = data.url || data.image.url;
+        if (resp.ok && (data?.cached_url || data?.url || data?.image?.url)) {
+          next.imageUrl = toAbsoluteMediaUrl(
+            data.cached_url || data.url || data.image.url
+          );
         }
       }
       if (needsVideo) {
@@ -1431,8 +1433,8 @@ export default function UxGeneratorScreen({
               });
               console.log("[ux-generator] dalle_video frame status", r.status);
               const d = await r.json();
-              if (r.ok && (d?.url || d?.image?.url)) {
-                urls.push(d.url || d.image.url);
+              if (r.ok && (d?.cached_url || d?.url || d?.image?.url)) {
+                urls.push(toAbsoluteMediaUrl(d.cached_url || d.url || d.image.url));
               }
             } catch (e) {
               console.warn("[ux-generator] dalle frame failed", e);
@@ -1490,8 +1492,8 @@ export default function UxGeneratorScreen({
                 }),
               });
               const d = await r.json();
-              if (r.ok && (d?.url || d?.image?.url)) {
-                urls.push(d.url || d.image.url);
+              if (r.ok && (d?.cached_url || d?.url || d?.image?.url)) {
+                urls.push(toAbsoluteMediaUrl(d.cached_url || d.url || d.image.url));
               }
             } catch (e) {
               console.warn("[ux-generator] storyboard image fetch failed", e);

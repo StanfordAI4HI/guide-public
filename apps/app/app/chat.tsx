@@ -57,16 +57,18 @@ const createSessionIdentifier = () => {
 
 const resolveCachedImageUrl = (payload: any) => {
   if (!payload) return "";
-  if (typeof payload === "string") return payload;
+  const toAbsoluteUrl = (value: string) =>
+    value.startsWith("/") ? `${API_BASE}${value}` : value;
+  if (typeof payload === "string") return toAbsoluteUrl(payload);
   const cached =
     typeof payload?.cached_url === "string"
       ? payload.cached_url
       : typeof payload?.cachedUrl === "string"
         ? payload.cachedUrl
         : "";
-  if (cached) return cached;
-  if (typeof payload?.url === "string") return payload.url;
-  if (typeof payload?.image?.url === "string") return payload.image.url;
+  if (cached) return toAbsoluteUrl(cached);
+  if (typeof payload?.url === "string") return toAbsoluteUrl(payload.url);
+  if (typeof payload?.image?.url === "string") return toAbsoluteUrl(payload.image.url);
   return "";
 };
 
