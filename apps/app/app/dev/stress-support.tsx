@@ -21,6 +21,10 @@ import { Asset } from "expo-asset";
 const API_BASE =
   process.env.EXPO_PUBLIC_API_BASE?.replace(/\/+$/, "") || "http://localhost:8787";
 const TTS_URL = `${API_BASE}/dev/media/tts`;
+const resolveImageUrl = (payload: any) => {
+  const rawUrl = payload?.cached_url || payload?.url || payload?.image?.url || "";
+  return rawUrl.startsWith("/") ? `${API_BASE}${rawUrl}` : rawUrl;
+};
 const AMBIENT_LOOPS: Record<string, string> = {
   piano: require("../../assets/audio/piano.mp3"),
   rain: require("../../assets/audio/rain.mp3"),
@@ -1336,7 +1340,7 @@ const resolveAssetForStep = useCallback(
             const detail = data?.detail || data?.error || `status ${resp.status}`;
             throw new Error(detail);
           }
-          const url = data?.url || data?.image?.url;
+          const url = resolveImageUrl(data);
           if (url) {
             console.log("[stress-support] image ready", { prompt: prompt.slice(0, 80), url: url.slice(0, 80) });
             setImageCache((prev) => ({ ...prev, [prompt]: { status: "ready", url } }));
@@ -1386,7 +1390,7 @@ const resolveAssetForStep = useCallback(
             const detail = data?.detail || data?.error || `status ${resp.status}`;
             throw new Error(detail);
           }
-          const url = data?.url || data?.image?.url;
+          const url = resolveImageUrl(data);
           if (url) {
             console.log("[stress-support] dalle_video image ready", { prompt: prompt.slice(0, 80), url: url.slice(0, 80) });
             setVideoImageCache((prev) => ({ ...prev, [prompt]: { status: "ready", url } }));
