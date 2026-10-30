@@ -3778,7 +3778,7 @@ app.post('/summary/variant', async (req, res) => {
   }
 });
 
-// Bulk session reads require HTTP Basic auth with SESSIONS_PASSWORD (any username).
+// Bulk session reads (and the /dev/sessions browser) require HTTP Basic auth with SESSIONS_PASSWORD (any username).
 // Without a password configured they stay open in development and are hidden in production.
 const SESSIONS_PASSWORD = process.env.SESSIONS_PASSWORD || '';
 
@@ -4311,7 +4311,7 @@ app.post('/sessions/:id/demographics', async (req, res) => {
 const canServeDevPages =
   process.env.NODE_ENV !== 'production' || process.env.ALLOW_DEV_PAGES === '1';
 
-app.get('/dev/sessions', async (req, res) => {
+app.get('/dev/sessions', requireSessionsPassword, async (req, res) => {
   if (!canServeDevPages) {
     return res.status(404).send('Not found');
   }
@@ -4388,7 +4388,7 @@ app.get('/dev/sessions', async (req, res) => {
   }
 });
 
-app.get('/dev/sessions/:id', async (req, res) => {
+app.get('/dev/sessions/:id', requireSessionsPassword, async (req, res) => {
   if (!canServeDevPages) {
     return res.status(404).send('Not found');
   }

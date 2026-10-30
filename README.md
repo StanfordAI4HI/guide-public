@@ -69,7 +69,7 @@ Server (`apps/server/.env`):
 - `OPENAI_API_KEY` (required)
 - `PORT` (optional, default `8787`)
 - `OPENAI_IMAGE_MODEL` (optional, default `gpt-image-2`)
-- `SESSIONS_PASSWORD` (optional; HTTP Basic auth password for `GET /sessions` and `GET /sessions/export`; without it these return 404 in production)
+- `SESSIONS_PASSWORD` (optional; HTTP Basic auth password for `GET /sessions`, `GET /sessions/export` and the `/dev/sessions` browser; without it these return 404 in production)
 - `CORS_ORIGINS` (recommended in production; comma-separated allowlist)
 - `ALLOW_LOG_STREAM` (optional; default off in production)
 - `RATE_LIMIT_ENABLED` (optional; default on in production)
