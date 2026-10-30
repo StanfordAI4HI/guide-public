@@ -3778,7 +3778,27 @@ app.post('/summary/variant', async (req, res) => {
   }
 });
 
-app.get('/sessions', async (req, res) => {
+// Bulk session reads require HTTP Basic auth with SESSIONS_PASSWORD (any username).
+// Without a password configured they stay open in development and are hidden in production.
+const SESSIONS_PASSWORD = process.env.SESSIONS_PASSWORD || '';
+
+function requireSessionsPassword(req, res, next) {
+  if (!SESSIONS_PASSWORD) {
+    if (process.env.NODE_ENV !== 'production') return next();
+    return res.status(404).json({ error: 'not found' });
+  }
+  const header = String(req.headers?.authorization || '');
+  const encoded = header.startsWith('Basic ') ? header.slice(6).trim() : '';
+  const decoded = Buffer.from(encoded, 'base64').toString('utf8');
+  const supplied = decoded.slice(decoded.indexOf(':') + 1);
+  const suppliedHash = crypto.createHash('sha256').update(supplied).digest();
+  const expectedHash = crypto.createHash('sha256').update(SESSIONS_PASSWORD).digest();
+  if (encoded && crypto.timingSafeEqual(suppliedHash, expectedHash)) return next();
+  res.set('WWW-Authenticate', 'Basic realm="sessions"');
+  return res.status(401).json({ error: 'password required' });
+}
+
+app.get('/sessions', requireSessionsPassword, async (req, res) => {
   const limitParam = Number(req.query?.limit);
   try {
     const sessions = await sessionStore.listSessions(
@@ -3794,7 +3814,7 @@ app.get('/sessions', async (req, res) => {
   }
 });
 
-app.get('/sessions/export', async (req, res) => {
+app.get('/sessions/export', requireSessionsPassword, async (req, res) => {
   try {
     const records = await sessionStore.exportAllSessions();
     const payload = {

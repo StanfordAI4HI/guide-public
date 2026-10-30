@@ -24,7 +24,7 @@ While some basic safeguards are included, this system does not replace professio
 
 This is a research application built to demonstrate the ideas in the GUIDE paper. We will try to keep it maintained, but ongoing maintenance is difficult: the underlying models change constantly, and older ones are frequently updated or deprecated. Expect some drift over time.
 
-**Note on image generation:** the current code defaults to OpenAI's `gpt-image-1` model, whereas the deployed study version used `dall-e-3`. Output format and behavior may therefore differ between this source and the version used in the study.
+**Note on image generation:** the current code defaults to OpenAI's `gpt-image-2` model (override with `OPENAI_IMAGE_MODEL`), whereas the deployed study version used `dall-e-3`, which OpenAI has since retired. Output format and behavior may therefore differ between this source and the version used in the study.
 
 ## Prerequisites
 
@@ -68,9 +68,9 @@ Open the URL shown by Expo (usually `http://localhost:8081`).
 Server (`apps/server/.env`):
 - `OPENAI_API_KEY` (required)
 - `PORT` (optional, default `8787`)
-- `OPENAI_IMAGE_MODEL` (optional, default `dall-e-3`)
+- `OPENAI_IMAGE_MODEL` (optional, default `gpt-image-2`)
+- `SESSIONS_PASSWORD` (optional; HTTP Basic auth password for `GET /sessions` and `GET /sessions/export`; without it these return 404 in production)
 - `CORS_ORIGINS` (recommended in production; comma-separated allowlist)
-- `ALLOW_SESSION_READS` (optional; default off in production)
 - `ALLOW_LOG_STREAM` (optional; default off in production)
 - `RATE_LIMIT_ENABLED` (optional; default on in production)
 - `RATE_LIMIT_MAX` (optional; default `120`)

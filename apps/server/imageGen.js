@@ -8,7 +8,7 @@ async function generateImage(prompt, options = {}) {
   }
 
   const {
-    model = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1',
+    model = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2',
     size = '1024x1024',
     n = 1,
     quality,
