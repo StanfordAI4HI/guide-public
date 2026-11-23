@@ -1514,7 +1514,7 @@ export default function LayersScreen() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  prompt: `${spec?.instruction || uxSummary} — reflect the user’s environment and situation (desk, home, commute, office), sharp focus, concrete real-world scene, high detail, no blur or haze, no faces, no text, cinematic still`,
+                  prompt: `${spec?.instruction || uxSummary} — one single scene in the user’s most relevant setting (such as a desk, home, commute or office), not a collage or grid, sharp focus, concrete real-world scene, high detail, no blur or haze, no faces, no text, cinematic still`,
                 }),
               })
                 .then(async (resp) => {
